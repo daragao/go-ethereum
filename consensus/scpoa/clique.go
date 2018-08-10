@@ -296,6 +296,7 @@ func (c *SCPoa) verifyHeader(chain consensus.ChainReader, header *types.Header, 
 		return errMissingSignature
 	}
 	// Ensure that the extra-data contains a signer list on checkpoint, but none otherwise
+	// TODO verify signer against smart contract
 	signersBytes := len(header.Extra) - extraVanity - extraSeal
 	if !checkpoint && signersBytes != 0 {
 		return errExtraSigners
@@ -354,6 +355,7 @@ func (c *SCPoa) verifyCascadingFields(chain consensus.ChainReader, header *types
 		return err
 	}
 	// If the block is a checkpoint block, verify the signer list
+	// TODO verify signers against a smart contract
 	if number%c.config.Epoch == 0 {
 		signers := make([]byte, len(snap.Signers)*common.AddressLength)
 		for i, signer := range snap.signers() {
@@ -395,6 +397,7 @@ func (c *SCPoa) snapshot(chain consensus.ChainReader, number uint64, hash common
 			if err := c.VerifyHeader(chain, genesis, false); err != nil {
 				return nil, err
 			}
+			// TODO generate signers from smart contract???
 			signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
 			for i := 0; i < len(signers); i++ {
 				copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
@@ -481,6 +484,7 @@ func (c *SCPoa) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if err != nil {
 		return err
 	}
+	// TODO verify signers against smart contract???
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorized
 	}
@@ -547,6 +551,7 @@ func (c *SCPoa) Prepare(chain consensus.ChainReader, header *types.Header) error
 	header.Extra = header.Extra[:extraVanity]
 
 	if number%c.config.Epoch == 0 {
+		// TODO use signers from smart contract
 		for _, signer := range snap.signers() {
 			header.Extra = append(header.Extra, signer[:]...)
 		}
@@ -613,6 +618,7 @@ func (c *SCPoa) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if err != nil {
 		return nil, err
 	}
+	// consult smart contrac tto check if seal can be done by this signer
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return nil, errUnauthorized
 	}
@@ -685,7 +691,7 @@ func (c *SCPoa) APIs(chain consensus.ChainReader) []rpc.API {
 	return []rpc.API{{
 		Namespace: "clique",
 		Version:   "1.0",
-		Service:   &API{chain: chain, clique: c},
+		Service:   &API{chain: chain, scpoa: c},
 		Public:    false,
 	}}
 }
