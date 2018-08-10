@@ -3,9 +3,13 @@ package scpoa
 import (
 	"encoding/json"
 	"log"
+	"math/big"
+	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/compiler"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // ---------------------------------------------------------
@@ -15,6 +19,22 @@ import (
 // TODO
 //   SignerDeploy
 //   GetSigner from Signers address using tranaction and local key
+
+func deploySignerContract(abiStr string, bytecode []byte, signers []common.Address) {
+	// generate payload
+	abiContract, err := abi.JSON(strings.NewReader(abiStr))
+	if err != nil {
+		log.Fatal("ERROR reading contract ABI ", err)
+	}
+	packedABI, err := abiContract.Pack("", signers)
+	if err != nil {
+		log.Fatal("ERROR packing ABI ", err)
+	}
+	payloadBytecode := append(bytecode, packedABI...)
+
+	gasLimit := big.NewInt(30000)
+	tx := types.NewContractCreation(nonce, nil, gasLimit, gasPrice, payloadBytecode)
+}
 
 func compileSignerContract() (string, []byte) {
 	basePath := "./" // os.Getenv("GOPATH") + "/src/github.com/clearmatics/ion/contracts/"
