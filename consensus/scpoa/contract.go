@@ -32,8 +32,11 @@ func deploySignerContract(abiStr string, bytecode []byte, signers []common.Addre
 	}
 	payloadBytecode := append(bytecode, packedABI...)
 
-	gasLimit := big.NewInt(30000)
+	gasPrice := big.NewInt(0)
+	gasLimit := uint64(30000)
+	nonce := uint64(0)
 	tx := types.NewContractCreation(nonce, nil, gasLimit, gasPrice, payloadBytecode)
+	log.Println(tx)
 }
 
 func compileSignerContract() (string, []byte) {
@@ -50,6 +53,6 @@ func compileSignerContract() (string, []byte) {
 	if err != nil {
 		log.Fatal("ERROR marshaling Signer contract ABI:", err)
 	}
-	signerBytecode := common.Hex2Bytes(signerContract.Code)
+	signerBytecode := common.Hex2Bytes(signerContract.Code[2:])
 	return string(signerABIBytes), signerBytecode
 }
