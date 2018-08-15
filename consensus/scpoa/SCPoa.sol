@@ -9,7 +9,7 @@ interface SCPoa {
  * Signers was created just as an example of an implementation of the SCPoa interface
  */
 contract Signers {
-  mapping (address => bool) private signers;
+  mapping (address => bool) public signers;
 
   constructor(address[] _signers) public {
     for(uint i=0; i<_signers.length; i++) {

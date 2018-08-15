@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"strings"
 
+	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -96,6 +97,36 @@ func compileAndDeployContract(
 		log.Fatal("ERROR sending contract deployment transaction")
 	}
 	return signedTx
+}
+
+func callContract(
+	ctx context.Context,
+	client bind.ContractCaller,
+	abiStr string,
+	from, to common.Address,
+	methodName string,
+	out interface{},
+	args ...interface{},
+) {
+	abiContract, err := abi.JSON(strings.NewReader(string(abiStr)))
+	if err != nil {
+		log.Fatal("ERROR reading contract ABI ", err)
+	}
+
+	input, err := abiContract.Pack(methodName, args...)
+	if err != nil {
+		log.Fatal("ERROR packing the method name for the contract call: ", err)
+	}
+	msg := ethereum.CallMsg{From: from, To: &to, Data: input}
+	output, err := client.CallContract(ctx, msg, nil)
+	if err != nil {
+		log.Fatal("ERROR calling the Ion Contract", err)
+	}
+	log.Printf("OUTPUT: %#v", output)
+	err = abiContract.Unpack(out, methodName, output)
+	if err != nil {
+		log.Fatal("ERROR upacking the call: ", err)
+	}
 }
 
 func compileSignerContract() (string, []byte) {
