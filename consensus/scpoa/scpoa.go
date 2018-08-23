@@ -619,6 +619,7 @@ func (c *SCPoa) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, err
 	}
 	// consult smart contrac tto check if seal can be done by this signer
+	// TODO use signers in smart contract
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return nil, errUnauthorized
 	}
