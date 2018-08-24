@@ -122,7 +122,6 @@ func callContract(
 	if err != nil {
 		log.Fatal("ERROR calling the Ion Contract", err)
 	}
-	log.Printf("OUTPUT: %#v", output)
 	err = abiContract.Unpack(out, methodName, output)
 	if err != nil {
 		log.Fatal("ERROR upacking the call: ", err)
