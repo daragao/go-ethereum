@@ -112,5 +112,7 @@ func Test_AddTxToSCPoa(t *testing.T) {
 		t.Fatalf("Failed to create snapshot: %v", err)
 	}
 
-	t.Logf("snapshot: %#v", snap)
+	header0 := chainReader.GetHeaderByNumber(0)
+	//block0 := chainReader.GetBlock(header0.Hash(), 0)
+	t.Logf("header: %+v\nsnapshot: %+v", header0, snap)
 }
