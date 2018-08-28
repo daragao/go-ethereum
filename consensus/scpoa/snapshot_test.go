@@ -372,7 +372,7 @@ func TestVoting(t *testing.T) {
 			}
 			accounts.sign(headers[j], vote.signer)
 		}
-		// Pass all the headers through clique and ensure tallying succeeds
+		// Pass all the headers through SCPoa and ensure tallying succeeds
 		head := headers[len(headers)-1]
 
 		snap, err := New(&params.SCPoaConfig{Epoch: tt.epoch}, db).snapshot(&testerChainReader{db: db}, head.Number.Uint64(), head.Hash(), headers)

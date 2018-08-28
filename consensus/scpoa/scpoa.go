@@ -50,7 +50,7 @@ const (
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
-// Clique proof-of-authority protocol constants.
+// SCPoa proof-of-authority protocol constants.
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -207,7 +207,7 @@ type SCPoa struct {
 	lock   sync.RWMutex   // Protects the signer fields
 }
 
-// New creates a Clique proof-of-authority consensus engine with the initial
+// New creates a SCPoa proof-of-authority consensus engine with the initial
 // signers set to the ones provided by the user.
 func New(config *params.SCPoaConfig, db ethdb.Database) *SCPoa {
 
@@ -681,7 +681,7 @@ func CalcDifficulty(snap *Snapshot, signer common.Address) *big.Int {
 	return new(big.Int).Set(diffNoTurn)
 }
 
-// Close implements consensus.Engine. It's a noop for clique as there is are no background threads.
+// Close implements consensus.Engine. It's a noop for SCPoa as there is are no background threads.
 func (c *SCPoa) Close() error {
 	return nil
 }
@@ -690,7 +690,7 @@ func (c *SCPoa) Close() error {
 // controlling the signer voting.
 func (c *SCPoa) APIs(chain consensus.ChainReader) []rpc.API {
 	return []rpc.API{{
-		Namespace: "clique",
+		Namespace: "scpoa",
 		Version:   "1.0",
 		Service:   &API{chain: chain, scpoa: c},
 		Public:    false,
