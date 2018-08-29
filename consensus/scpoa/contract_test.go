@@ -69,18 +69,24 @@ func Test_AddTxToSCPoa(t *testing.T) {
 	// extraVanity global variable 32
 	// extraSeal global variable 65
 	// Create the genesis block with the initial set of signers
-	genesis := &core.Genesis{
+	scpoaConfig := params.SCPoaConfig{Epoch: 3, Period: 10}
+	gspec := &core.Genesis{
 		ExtraData: make([]byte, extraVanity+common.AddressLength*len(signers)+extraSeal),
 	}
+	t.Logf("gspec: %#v\n\n", gspec)
+	gspec.Config = params.TestChainConfig
+	gspec.Config.SCPoa = &scpoaConfig
 	for j, signer := range signers {
-		copy(genesis.ExtraData[extraVanity+j*common.AddressLength:], signer[:])
+		copy(gspec.ExtraData[extraVanity+j*common.AddressLength:], signer[:])
 	}
 	// Create a pristine blockchain with the genesis injected
 	db := ethdb.NewMemDatabase()
-	genesis.Commit(db)
+	genesis := gspec.MustCommit(db)
 
-	scpoaConfig := params.SCPoaConfig{Epoch: 3, Period: 10}
 	scpoa := New(&scpoaConfig, db)
+
+	chain, receipts := core.GenerateChain(gspec.Config, genesis, scpoa, db, 3, nil) //, func(i int, gen *core.BlockGen) {})
+	t.Logf("\nchain: %#v\nreceipts: %#v\n\n", chain[1], receipts)
 
 	// Assemble a chain of headers from the cast votes
 	header := &types.Header{
@@ -114,5 +120,5 @@ func Test_AddTxToSCPoa(t *testing.T) {
 
 	header0 := chainReader.GetHeaderByNumber(0)
 	block0 := chainReader.GetBlock(header0.Hash(), 0)
-	t.Logf("header: %+v\nsnapshot: %+v", block0, snap)
+	t.Logf("header: %+v\nsnapshot: %+v", block0.Header(), snap)
 }
