@@ -113,6 +113,6 @@ func Test_AddTxToSCPoa(t *testing.T) {
 	}
 
 	header0 := chainReader.GetHeaderByNumber(0)
-	//block0 := chainReader.GetBlock(header0.Hash(), 0)
-	t.Logf("header: %+v\nsnapshot: %+v", header0, snap)
+	block0 := chainReader.GetBlock(header0.Hash(), 0)
+	t.Logf("header: %+v\nsnapshot: %+v", block0, snap)
 }
